@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/go-charset/charset"
-	_ "code.google.com/p/go-charset/data"
+	"github.com/karolgorecki/nbp/Godeps/_workspace/src/code.google.com/p/go-charset/charset"
+	_ "github.com/karolgorecki/nbp/Godeps/_workspace/src/code.google.com/p/go-charset/data"
 )
 
 // a - tabela kursów średnich walut obcych;

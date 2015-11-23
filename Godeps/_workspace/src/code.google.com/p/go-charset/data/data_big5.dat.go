@@ -4,7 +4,7 @@
 package data
 
 import (
-	"code.google.com/p/go-charset/charset"
+	"github.com/karolgorecki/nbp/Godeps/_workspace/src/code.google.com/p/go-charset/charset"
 	"io"
 	"io/ioutil"
 	"strings"

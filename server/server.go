@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/karolgorecki/nbp-api/nbp"
-
-	"github.com/julienschmidt/httprouter"
+	"github.com/karolgorecki/nbp/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
+	"github.com/karolgorecki/nbp/nbp"
 )
 
 func RegisterHandlers() *httprouter.Router {

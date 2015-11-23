@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/karolgorecki/nbp-api/server"
+	"github.com/karolgorecki/nbp/server"
 )
 
 func main() {

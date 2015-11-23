@@ -1,6 +1,9 @@
 {
-	"ImportPath": "github.com/karolgorecki/nbp-api",
+	"ImportPath": "github.com/karolgorecki/nbp",
 	"GoVersion": "go1.5.1",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go-charset/charset",
