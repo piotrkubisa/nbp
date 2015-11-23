@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/karolgorecki/nbp-api/server"
 )
@@ -10,5 +11,5 @@ import (
 func main() {
 
 	rt := server.RegisterHandlers()
-	log.Fatal(http.ListenAndServe(":8080", rt))
+	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), rt))
 }
