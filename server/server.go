@@ -48,7 +48,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) e
 // It follows the JSEND standard for JSON response.
 // See https://labs.omniti.com/labs/jsend
 func handleOutput(w http.ResponseWriter, code int, data interface{}) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json;charset=utf-8")
 	w.WriteHeader(code)
 
 	success := false
