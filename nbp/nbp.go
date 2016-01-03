@@ -34,8 +34,9 @@ func GetResourceLocation(sDate string, sType string) (string, error) {
 	}
 
 	sDate = pDate.Format("060102")
+	fullYear := pDate.Format("2006")
 
-	resp, err := http.Get(nbpAPI + "dir.txt")
+	resp, err := http.Get(nbpAPI + "dir" + fullYear + ".txt")
 	if err != nil {
 		return "", errors.New(errNbpApiProblem)
 	}

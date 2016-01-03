@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/karolgorecki/nbp/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
 	"github.com/karolgorecki/nbp/nbp"
@@ -15,7 +16,7 @@ func RegisterHandlers() *httprouter.Router {
 
 	rt.NotFound = ntHandler{}
 
-	fmt.Println("Running on: http://localhost:8080")
+	fmt.Println("Running on: http://localhost:" + os.Getenv("PORT"))
 	return rt
 }
 
