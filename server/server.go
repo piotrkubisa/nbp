@@ -66,6 +66,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) e
 // See https://labs.omniti.com/labs/jsend
 func handleOutput(w http.ResponseWriter, code int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json;charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.WriteHeader(code)
 
 	success := false
