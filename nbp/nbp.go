@@ -117,6 +117,7 @@ func GetData(file string, code string) (Query, error) {
 }
 
 type Query struct {
+	FromData    string     `xml:"data_publikacji" json:"fromDate"`
 	TableNumber string     `xml:"numer_tabeli" json:"tableNumber"`
 	Currencies  []Currency `xml:"pozycja" json:"currencies"`
 }

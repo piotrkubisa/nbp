@@ -3,8 +3,10 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/karolgorecki/nbp/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
 	"github.com/karolgorecki/nbp/nbp"
@@ -25,12 +27,26 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) e
 	rType := p.ByName("type")
 	rCode := p.ByName("code")
 
+	cDate, _ := time.Parse("2006-01-02", rDate)
+	if time.Now().Before(cDate) {
+		handleOutput(w, http.StatusBadRequest, "You have given a future date")
+		return nil
+	}
+
 	f, err := nbp.GetResourceLocation(rDate, rType)
 	if err != nil {
 		handleOutput(w, http.StatusBadRequest, "There was some problem with your request")
 		return nil
 	}
 
+	prevData, _ := time.Parse("2006-01-02", rDate)
+	for f == "" {
+		prevData = prevData.AddDate(0, 0, -1)
+		f, err = nbp.GetResourceLocation(prevData.Format("2006-01-02"), rType)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
 	if f == "" {
 		handleOutput(w, http.StatusBadRequest, "Resource for given date was not found")
 		return nil
