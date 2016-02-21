@@ -8,8 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/karolgorecki/nbp/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
-	"github.com/karolgorecki/nbp/nbp"
+	"github.com/karolgorecki/nbp/svc"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func RegisterHandlers() *httprouter.Router {
@@ -33,7 +34,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) e
 		return nil
 	}
 
-	f, err := nbp.GetResourceLocation(rDate, rType)
+	f, err := svc.GetResourceLocation(rDate, rType)
 	if err != nil {
 		handleOutput(w, http.StatusBadRequest, "There was some problem with your request")
 		return nil
@@ -42,7 +43,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) e
 	prevData, _ := time.Parse("2006-01-02", rDate)
 	for f == "" {
 		prevData = prevData.AddDate(0, 0, -1)
-		f, err = nbp.GetResourceLocation(prevData.Format("2006-01-02"), rType)
+		f, err = svc.GetResourceLocation(prevData.Format("2006-01-02"), rType)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -51,7 +52,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) e
 		handleOutput(w, http.StatusBadRequest, "Resource for given date was not found")
 		return nil
 	}
-	res, err := nbp.GetData(f, rCode)
+	res, err := svc.GetData(f, rCode)
 	if err != nil {
 		handleOutput(w, http.StatusBadRequest, "There was some problem with your request")
 		return nil

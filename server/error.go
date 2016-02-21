@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/karolgorecki/nbp/Godeps/_workspace/src/github.com/julienschmidt/httprouter"
+	"github.com/julienschmidt/httprouter"
 )
 
 // badRequest is handled by setting the status code in the reply to StatusBadRequest.
