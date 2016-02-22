@@ -11,29 +11,27 @@ import (
 	"time"
 
 	"code.google.com/p/go-charset/charset"
+	// _ is ok here ;)
 	_ "code.google.com/p/go-charset/data"
 )
 
-// a - tabela kursów średnich walut obcych;
-// b - tabela kursów średnich walut niewymienialnych;
-// c - tabela kursów kupna i sprzedaży;
-// h - tabela kursów jednostek rozliczeniowych.
 const (
+	// a - tabela kursów średnich walut obcych;
+	// c - tabela kursów kupna i sprzedaży;
 	avg                = "a"
 	both               = "c"
 	nbpAPI             = "http://www.nbp.pl/kursy/xml/"
 	errCannotParseDate = "Couldn't parse the given date"
-	errNbpApiProblem   = "Couldn't get data from NBP API"
+	errNbpAPIProblem   = "Couldn't get data from NBP API"
 )
 
-func GetResourceLocation(sDate string, sType string) (string, error) {
-
-	pDate, err := time.Parse("2006-01-02", sDate)
+func getFormatedYear(date string) (string, error) {
+	pDate, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return "", errors.New(errCannotParseDate)
 	}
 
-	sDate = pDate.Format("060102")
+	date = pDate.Format("060102")
 	fullYear := pDate.Format("2006")
 	currentYear := time.Now().Format("2006")
 
@@ -41,12 +39,25 @@ func GetResourceLocation(sDate string, sType string) (string, error) {
 	if currentYear != fullYear {
 		yr = fullYear
 	}
+
+	return yr, nil
+}
+
+// GetResourceLocation returns name of file that contains the currencies for given date
+// We're searching the index which is just a txt file.
+// E.g.: dir2015.txt - contains references to files that have currencies for 2015 year
+// E.g.: dir.txt - contains references for the current year.
+func GetResourceLocation(sDate string, sType string) (string, error) {
+
+	yr, err := getFormatedYear(sDate)
 	resp, err := http.Get(nbpAPI + "dir" + yr + ".txt")
+	defer func() {
+		err = resp.Body.Close()
+	}()
 	if err != nil {
-		return "", errors.New(errNbpApiProblem)
+		return "", errors.New(errNbpAPIProblem)
 	}
 
-	defer resp.Body.Close()
 	lns := bufio.NewReader(resp.Body)
 	scn := bufio.NewScanner(lns)
 
@@ -72,19 +83,21 @@ func GetResourceLocation(sDate string, sType string) (string, error) {
 		default:
 			resourceName = ""
 		}
-
 	}
-
 	return resourceName, nil
 }
 
+// GetData fetches the currency/currencies in given file.
+// There is one file for one date. E.g.: 2015-01-02 is a20123123.xml
 func GetData(file string, code string) (Query, error) {
 
 	resp, err := http.Get(nbpAPI + file + ".xml")
+	defer func() {
+		err = resp.Body.Close()
+	}()
 	if err != nil {
 		return Query{}, errors.New("Couldn't not get data from NBP api")
 	}
-	defer resp.Body.Close()
 
 	var q Query
 	currencyData, _ := ioutil.ReadAll(resp.Body)
@@ -109,20 +122,18 @@ func GetData(file string, code string) (Query, error) {
 				res.Currencies = append(res.Currencies, c)
 			}
 		}
-
 	}
-
 	return res, nil
-
 }
 
+// Query ...
 type Query struct {
 	FromData    string     `xml:"data_publikacji" json:"fromDate"`
 	TableNumber string     `xml:"numer_tabeli" json:"tableNumber"`
-	Currencies  []Currency `xml:"pozycja" json:"currencies"`
+	Currencies  []currency `xml:"pozycja" json:"currencies"`
 }
 
-type Currency struct {
+type currency struct {
 	Code    string `xml:"kod_waluty" json:"code"`
 	Name    string `xml:"nazwa_waluty" json:"name"`
 	Ratio   string `xml:"przelicznik" json:"ratio"`

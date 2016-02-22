@@ -13,6 +13,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// RegisterHandlers does something
 func RegisterHandlers() *httprouter.Router {
 	rt := httprouter.New()
 	rt.GET("/:date/:type/:code", errorHandler(IndexHandler))
@@ -23,6 +24,7 @@ func RegisterHandlers() *httprouter.Router {
 	return rt
 }
 
+// IndexHandler Does something
 func IndexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) error {
 	rDate := p.ByName("date")
 	rType := p.ByName("type")
@@ -89,7 +91,10 @@ func handleOutput(w http.ResponseWriter, code int, data interface{}) {
 		res[msgType] = data
 	}
 
-	json.NewEncoder(w).Encode(res)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 type ntHandler struct{}

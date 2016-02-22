@@ -9,7 +9,6 @@ import (
 )
 
 func main() {
-
 	rt := server.RegisterHandlers()
 	log.Fatal(http.ListenAndServe(":"+os.Getenv("PORT"), rt))
 }
