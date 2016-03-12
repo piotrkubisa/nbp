@@ -1,1 +1,1 @@
-web: nbp
+web: main
