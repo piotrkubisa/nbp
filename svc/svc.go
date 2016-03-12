@@ -25,14 +25,22 @@ const (
 	errNbpAPIProblem   = "Couldn't get data from NBP API"
 )
 
+func getFormatedDate(date string) (string, error) {
+	tmpDate, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return "", errors.New("Couldn't not parse the given date")
+	}
+	date = tmpDate.Format("060102")
+	return date, nil
+}
+
 func getFormatedYear(date string) (string, error) {
-	pDate, err := time.Parse("2006-01-02", date)
+	tmpDate, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		return "", errors.New(errCannotParseDate)
 	}
 
-	date = pDate.Format("060102")
-	fullYear := pDate.Format("2006")
+	fullYear := tmpDate.Format("2006")
 	currentYear := time.Now().Format("2006")
 
 	yr := ""
@@ -50,6 +58,7 @@ func getFormatedYear(date string) (string, error) {
 func GetResourceLocation(sDate string, sType string) (string, error) {
 
 	yr, err := getFormatedYear(sDate)
+	fmtDate, err := getFormatedDate(sDate)
 	resp, err := http.Get(nbpAPI + "dir" + yr + ".txt")
 	defer func() {
 		err = resp.Body.Close()
@@ -64,7 +73,7 @@ func GetResourceLocation(sDate string, sType string) (string, error) {
 	fLsts := []string{}
 
 	for scn.Scan() {
-		if strings.Contains(scn.Text(), sDate) {
+		if strings.Contains(scn.Text(), fmtDate) {
 			fLsts = append(fLsts, scn.Text())
 		}
 	}
