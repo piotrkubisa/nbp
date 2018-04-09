@@ -5,7 +5,9 @@ import (
 	"bytes"
 	"encoding/xml"
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -147,4 +149,59 @@ type currency struct {
 	Average string `xml:"kurs_sredni" json:"average"`
 	Buy     string `xml:"kurs_kupna" json:"buy"`
 	Sell    string `xml:"kurs_sprzedazy" json:"sell"`
+}
+
+func Average(rDate, rCode string) (Query, error) {
+	return makeCall(rDate, "avg", rCode)
+}
+
+func Both(rDate, rCode string) (Query, error) {
+	return makeCall(rDate, "both", rCode)
+}
+
+func makeCall(rDate, rType, rCode string) (Query, error) {
+	var res Query
+
+	// Is the given date OK?
+	date, err := time.Parse("2006-01-02", rDate)
+	if err != nil {
+		return res, fmt.Errorf("Given date is wrong. Use 'YYYY-MM-DD'")
+	}
+
+	// Disable future date
+	sDate := date.Format("2006-01-02")
+	if time.Now().Before(date) {
+		return res, fmt.Errorf("Given date is wrong. Can't use future date")
+	}
+
+	// Disable date before 2002-01-02 -> first record in NBP
+	minDate, _ := time.Parse("2006-01-02", "2002-01-02")
+	if date.Before(minDate) {
+		return res, fmt.Errorf("Given date is wrong. Min date is 2002-01-02")
+	}
+
+	// Get the file containing the the currency data
+	f, err := GetResourceLocation(sDate, rType)
+	if err != nil {
+		return res, fmt.Errorf("There was some problem with your request")
+	}
+
+	// When the currency rate was not found for given date try to go back one day.
+	// It's used to get currencies for holidays, or weekends
+	prevData := date
+	for f == "" {
+		prevData = prevData.AddDate(0, 0, -1)
+		f, err = GetResourceLocation(prevData.Format("2006-01-02"), rType)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+	if f == "" {
+		return res, fmt.Errorf("Resource for given date was not found")
+	}
+	res, err = GetData(f, rCode)
+	if err != nil {
+		return res, fmt.Errorf("There was some problem with your request")
+	}
+	return res, nil
 }

@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/karolgorecki/nbp/svc"
 
@@ -30,57 +29,27 @@ func IndexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) e
 	rType := p.ByName("type")
 	rCode := p.ByName("code")
 
-	// Is the given date OK?
-	date, err := time.Parse("2006-01-02", rDate)
-	if err != nil {
-		handleOutput(w, http.StatusBadRequest, "Given date is wrong. Use 'YYYY-MM-DD'")
-		return nil
-	}
+	var (
+		res svc.Query
+		err error
+	)
 
 	// Is the type OK?
-	if rType != "avg" && rType != "both" {
-		handleOutput(w, http.StatusBadRequest, "Given type is wrong. Use 'avg' or 'both'")
-		return nil
-	}
-
-	// Disable future date
-	sDate := date.Format("2006-01-02")
-	if time.Now().Before(date) {
-		handleOutput(w, http.StatusBadRequest, "Given date is wrong. Can't use future date")
-		return nil
-	}
-
-	// Disable date before 2002-01-02 -> first record in NBP
-	minDate, _ := time.Parse("2006-01-02", "2002-01-02")
-	if date.Before(minDate) {
-		handleOutput(w, http.StatusBadRequest, "Given date is wrong. Min date is 2002-01-02")
-		return nil
-	}
-
-	// Get the file containing the the currency data
-	f, err := svc.GetResourceLocation(sDate, rType)
-	if err != nil {
-		handleOutput(w, http.StatusBadRequest, "There was some problem with your request")
-		return nil
-	}
-
-	// When the currency rate was not found for given date try to go back one day.
-	// It's used to get currencies for holidays, or weekends
-	prevData := date
-	for f == "" {
-		prevData = prevData.AddDate(0, 0, -1)
-		f, err = svc.GetResourceLocation(prevData.Format("2006-01-02"), rType)
+	switch rType {
+	case "avg":
+		res, err = svc.Average(rDate, rCode)
 		if err != nil {
-			log.Fatalln(err)
+			handleOutput(w, http.StatusBadRequest, err.Error)
+			return nil
 		}
-	}
-	if f == "" {
-		handleOutput(w, http.StatusBadRequest, "Resource for given date was not found")
-		return nil
-	}
-	res, err := svc.GetData(f, rCode)
-	if err != nil {
-		handleOutput(w, http.StatusBadRequest, "There was some problem with your request")
+	case "both":
+		res, err = svc.Both(rDate, rCode)
+		if err != nil {
+			handleOutput(w, http.StatusBadRequest, err.Error)
+			return nil
+		}
+	default:
+		handleOutput(w, http.StatusBadRequest, "Given type is wrong. Use 'avg' or 'both'")
 		return nil
 	}
 
